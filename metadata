@@ -1,3 +1,5 @@
-ONTAINER="data-extraction-tools"
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2024 The Linux Foundation
+CONTAINER="data-extraction-tools"
 TAG="latest"
 DOCKER_USER="mwatkins"
