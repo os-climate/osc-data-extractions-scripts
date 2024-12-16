@@ -1,0 +1,3 @@
+ONTAINER="data-extraction-tools"
+TAG="latest"
+DOCKER_USER="mwatkins"

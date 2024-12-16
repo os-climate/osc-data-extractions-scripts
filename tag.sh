@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2024 The Linux Foundation
 
-IMAGE=$(docker image ls | grep 'latest' | awk '{print $3}')
+source metadata
+
+IMAGE=$(docker image ls | grep "$CONTAINER" | awk '{print $3}')
 if [ -n "$IMAGE" ]; then
   docker image rmi "$IMAGE" --force > /dev/null 2>&1
 fi
@@ -17,4 +19,4 @@ else
   exit 1
 fi
 
-docker image tag "$IMAGE" osc/data-extraction-tools:latest
+docker image tag "$IMAGE" osc/$CONTAINER:$TAG
