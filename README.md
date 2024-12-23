@@ -48,18 +48,18 @@ performance when given a variable number of cores on which to run jobs.
 
 The function that performs the processing is defined as:
 
-````console
+```console
 _process_files() {
  echo "Processing: $1"
  sleep 3
 }
-`
+```
 
 The source directory containing PDF files for ingestion is by default:
 
 ```console
 SOURCE="inputs"
-````
+```
 
 To invoke the data extraction tooling, simply replace the sleep statement with
 the code required to ingest and process files. The shell script counts the
