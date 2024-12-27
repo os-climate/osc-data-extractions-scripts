@@ -34,10 +34,15 @@ fi
 echo "OS-Climate / Data Extraction Team"
 echo "Bulk execution script"
 
+if [ ! -s /etc/localtime ]; then
+  echo "Setting timezone"
+  ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime
+fi
+
 if ! (which parallel > /dev/null 2>&1); then
   echo "Installing GNU parallel"
   apt-get update -qq
-  apt-get install -qq parallel
+  apt-get install -qq parallel > /dev/null 2>&1
 fi
 
 echo "Parallel threads for batch processing: $THREADS"
