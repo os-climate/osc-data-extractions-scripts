@@ -48,8 +48,8 @@ fi
 echo "Parallel threads for batch processing: $THREADS"
 START=$(date '+%s')
 echo -n "Input files to process: "
-# shellcheck disable=SC2012
-FILES=$(ls "$SOURCE/$SELECTION")
+# shellcheck disable=SC2012,SC2086
+FILES=$(ls $SOURCE/$SELECTION)
 echo "$FILES" | wc -l
 # shellcheck disable=SC2012
 echo "$FILES" | parallel -j "$THREADS" _process_files
