@@ -20,8 +20,7 @@ echo "Installing Docker"
 
 # shellcheck disable=SC2031
 if [ "$NAME" = "Debian" ] || [ "$NAME" = "Debian GNU/Linux" ] || [ "$NAME" = "Ubuntu" ]; then
-  for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
-  $SUDO_CMD apt-get -y remove docker.io docker-doc docker-compose podman-docker containerd runc
+  $SUDO_CMD apt-get -qq remove docker.io docker-doc docker-compose podman-docker containerd runc
   $SUDO_CMD apt-get -qq update
   $SUDO_CMD apt-get -qq install ca-certificates curl
   $SUDO_CMD install -m 0755 -d /etc/apt/keyrings
@@ -55,7 +54,7 @@ systemctl start docker
 }
 
 # Install/run Docker
-DOCKER_CMD=$(which docker >/dev/null 2>&1)
+DOCKER_CMD=$(which docker 2>&1)
 if [ ! -x "$DOCKER_CMD" ]; then
   _install_docker
 fi
@@ -76,8 +75,12 @@ then
   $SUDO_CMD echo "fs-0abca58dcce09a51a.efs.eu-west-2.amazonaws.com:/                        /osc         nfs4   defaults,noatime  0   0" >> /etc/fstab
 fi
 
-echo "Mounting EFS/NFS mount"
-mount /osc
+if [ ! -d /osc/data-extraction ]; then
+  echo "Mounting EFS/NFS mount"
+  systemctl daemon-reload
+  mount /osc
+fi
+
 cd /osc/data-extraction || exit
 
 CURRENT_DIR=$(pwd)
