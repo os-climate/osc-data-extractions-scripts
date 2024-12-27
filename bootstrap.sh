@@ -14,32 +14,33 @@ if [ -f /etc/os-release ]; then
   source /etc/os-release
 fi
 
-#NAME=$(grep -e '^NAME=' /etc/os-release | awk -F= '{print $2}' | sed 's/"//g')
-LOWER_NAME=$(echo "$NAME" | tr '[:upper:]' '[:lower:]')
-
 _install_docker() {
 
 echo "Installing Docker"
 
-if [ "$NAME" = "Debian" ] || [ "$NAME" = "Ubuntu" ]; then
-  "$SUDO_CMD" apt-get -y remove docker.io docker-doc docker-compose podman-docker containerd runc
-  "$SUDO_CMD" apt-get update -qq
-  "$SUDO_CMD" apt-get install -qq ca-certificates curl
-  "$SUDO_CMD" install -m 0755 -d /etc/apt/keyrings
-  "$SUDO_CMD" curl -fsSL "https://download.docker.com/linux/$LOWER_NAME/gpg" -o /etc/apt/keyrings/docker.asc
-  "$SUDO_CMD" chmod a+r /etc/apt/keyrings/docker.asc
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
-    https://download.docker.com /linux/$LOWER_NAME $VERSION_CODENAME stable" | \
-  "$SUDO_CMD" tee /etc/apt/sources.list.d/docker.list > /dev/null
-  "$SUDO_CMD" apt-get update -qq
-  "$SUDO_CMD" apt-get install -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  "$SUDO_CMD" apt-get install -qq wget vim less git nfs-common
+# shellcheck disable=SC2031
+if [ "$NAME" = "Debian" ] || [ "$NAME" = "Debian GNU/Linux" ] || [ "$NAME" = "Ubuntu" ]; then
+  for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
+  $SUDO_CMD apt-get -y remove docker.io docker-doc docker-compose podman-docker containerd runc
+  $SUDO_CMD apt-get -qq update
+  $SUDO_CMD apt-get -qq install ca-certificates curl
+  $SUDO_CMD install -m 0755 -d /etc/apt/keyrings
+  $SUDO_CMD curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+  $SUDO_CMD chmod a+r /etc/apt/keyrings/docker.asc
+  # shellcheck disable=SC1091
+  $SUDO_CMD echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  $SUDO_CMD apt-get -qq update
+  $SUDO_CMD apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  $SUDO_CMD apt-get install -qq wget vim less git nfs-common
 
 elif [ "$NAME" = "Fedora" ]; then
-  "$SUDO_CMD" dnf -y install dnf-plugins-core
-  "$SUDO_CMD" dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-  "$SUDO_CMD" dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  "$SUDO_CMD" dnf install -y wget curl vim less git nfs-utils
+  $SUDO_CMD dnf -y install dnf-plugins-core
+  $SUDO_CMD dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+  $SUDO_CMD dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  $SUDO_CMD dnf install -y wget curl vim less git nfs-utils
 
 elif [ "$NAME" = "Amazon Linux" ]; then
   $SUDO_CMD yum update -y
@@ -65,9 +66,10 @@ if ! (docker version > /dev/null 2>&1); then
 fi
 
 if [ ! -d /osc ]; then
-  mkdir /osc
-  echo "Made directory: /osc"
+  echo "Creating directory: /osc"
+  $SUDO_CMD mkdir /osc
 fi
+
 if ! (grep -q '/osc' /etc/fstab);
 then
   echo "Creating /etc/fstab entry for NFS mount"
