@@ -16,6 +16,8 @@ fi
 
 _install_docker() {
 
+echo "Installing Docker"
+
 if [ "$NAME" = "Debian" ] || [ "$NAME" = "Debian GNU/Linux" ] || [ "$NAME" = "Ubuntu" ]; then
   for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
   $SUDO_CMD apt-get -y remove docker.io docker-doc docker-compose podman-docker containerd runc
