@@ -18,6 +18,7 @@ _install_docker() {
 
 echo "Installing Docker"
 
+# shellcheck disable=SC2031
 if [ "$NAME" = "Debian" ] || [ "$NAME" = "Debian GNU/Linux" ] || [ "$NAME" = "Ubuntu" ]; then
   for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
   $SUDO_CMD apt-get -y remove docker.io docker-doc docker-compose podman-docker containerd runc
@@ -35,14 +36,12 @@ if [ "$NAME" = "Debian" ] || [ "$NAME" = "Debian GNU/Linux" ] || [ "$NAME" = "Ub
   $SUDO_CMD apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   $SUDO_CMD apt-get install -qq wget vim less git nfs-common
 
-# shellcheck disable=SC2031
 elif [ "$NAME" = "Fedora" ]; then
   $SUDO_CMD dnf -y install dnf-plugins-core
   $SUDO_CMD dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
   $SUDO_CMD dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   $SUDO_CMD dnf install -y wget curl vim less git nfs-utils
 
-# shellcheck disable=SC2031
 elif [ "$NAME" = "Amazon Linux" ]; then
   $SUDO_CMD yum update -y
   $SUDO_CMD yum install -y docker
