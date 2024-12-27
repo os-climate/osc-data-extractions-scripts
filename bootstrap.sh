@@ -19,7 +19,7 @@ _install_docker() {
 echo "Installing Docker"
 
 # shellcheck disable=SC2031
-if [ "$NAME" = "Debian" ] || [ "$NAME" = "Debian GNU/Linux" ] || [ "$NAME" = "Ubuntu" ]; then
+if [ "$NAME" = "Debian" ] || [ "$NAME" = "Debian GNU/Linux" ]; then
   $SUDO_CMD apt-get -qq remove docker.io docker-doc docker-compose podman-docker containerd runc
   $SUDO_CMD apt-get -qq update
   $SUDO_CMD apt-get -qq install ca-certificates curl
@@ -33,6 +33,21 @@ if [ "$NAME" = "Debian" ] || [ "$NAME" = "Debian GNU/Linux" ] || [ "$NAME" = "Ub
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
   $SUDO_CMD apt-get -qq update
   $SUDO_CMD apt-get -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  $SUDO_CMD apt-get install -qq wget vim less git nfs-common
+
+elif [ "$NAME" = "Ubuntu" ]; then
+  $SUDO_CMD apt-get -qq remove docker.io docker-doc docker-compose podman-docker containerd runc
+  $SUDO_CMD apt-get -qq update
+  $SUDO_CMD apt-get -qq install ca-certificates curl
+  $SUDO_CMD install -m 0755 -d /etc/apt/keyrings
+  $SUDO_CMD curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  # shellcheck disable=SC1091
+  $SUDO_CMD echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  sudo apt-get update
+  $SUDO_CMD apt-get install -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   $SUDO_CMD apt-get install -qq wget vim less git nfs-common
 
 elif [ "$NAME" = "Fedora" ]; then
