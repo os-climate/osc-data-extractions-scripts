@@ -50,7 +50,7 @@ elif [ "$NAME" = "Ubuntu" ]; then
   $SUDO_CMD apt-get install -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
   $SUDO_CMD apt-get install -qq wget vim less git nfs-common
 
-elif [ "$NAME" = "Fedora" ]; then
+elif [ "$NAME" = "Fedora" ] || [ "$NAME" = "Fedora Linux" ]; then
   $SUDO_CMD dnf -y install dnf-plugins-core
   $SUDO_CMD dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
   $SUDO_CMD dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
@@ -61,6 +61,10 @@ elif [ "$NAME" = "Amazon Linux" ]; then
   $SUDO_CMD yum install -y docker
   $SUDO_CMD usermod -a -G docker ec2-user
   $SUDO_CMD yum install -y wget vim less git nfs-utils amazon-efs-utils
+else
+  echo "Unsupported distribution"
+  echo "Supported distributions: Ubuntu|Debian|Fedora|AmazonLinux"
+  exit 1
 fi
 
 # Start at boot and run Docker
