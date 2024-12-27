@@ -33,6 +33,13 @@ fi
 
 echo "OS-Climate / Data Extraction Team"
 echo "Bulk execution script"
+
+if ! (which parallel > /dev/null 2>&1); then
+  echo "Installing GNU parallel"
+  apt-get update -qq
+  apt-get install -qq parallel
+fi
+
 echo "Parallel threads for batch processing: $THREADS"
 START=$(date '+%s')
 echo -n "Input files to process: "

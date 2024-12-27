@@ -19,6 +19,8 @@ LOWER_NAME=$(echo "$NAME" | tr '[:upper:]' '[:lower:]')
 
 _install_docker() {
 
+echo "Installing Docker"
+
 if [ "$NAME" = "Debian" ] || [ "$NAME" = "Ubuntu" ]; then
   "$SUDO_CMD" apt-get -y remove docker.io docker-doc docker-compose podman-docker containerd runc
   "$SUDO_CMD" apt-get update -qq
@@ -31,20 +33,19 @@ if [ "$NAME" = "Debian" ] || [ "$NAME" = "Ubuntu" ]; then
   "$SUDO_CMD" tee /etc/apt/sources.list.d/docker.list > /dev/null
   "$SUDO_CMD" apt-get update -qq
   "$SUDO_CMD" apt-get install -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  "$SUDO_CMD" apt-get install -qq wget curl vim less git
+  "$SUDO_CMD" apt-get install -qq wget vim less git nfs-common
 
 elif [ "$NAME" = "Fedora" ]; then
   "$SUDO_CMD" dnf -y install dnf-plugins-core
   "$SUDO_CMD" dnf-3 config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
   "$SUDO_CMD" dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  "$SUDO_CMD" dnf install -y wget curl vim less git
+  "$SUDO_CMD" dnf install -y wget curl vim less git nfs-utils
 
 elif [ "$NAME" = "Amazon Linux" ]; then
-  "$SUDO_CMD" yum update -y
-  "$SUDO_CMD" amazon-linux-extras install docker
-  "$SUDO_CMD" yum install -y docker
-  "$SUDO_CMD" usermod -a -G docker ec2-user
-  "$SUDO_CMD" yum install -y wget curl vim less git
+  $SUDO_CMD yum update -y
+  $SUDO_CMD yum install -y docker
+  $SUDO_CMD usermod -a -G docker ec2-user
+  $SUDO_CMD yum install -y wget vim less git nfs-utils amazon-efs-utils
 fi
 
 # Start at boot and run Docker
@@ -53,19 +54,27 @@ systemctl start docker
 }
 
 # Install/run Docker
-DOCKER_CMD=$(which docker)
+DOCKER_CMD=$(which docker >/dev/null 2>&1)
 if [ ! -x "$DOCKER_CMD" ]; then
   _install_docker
-  DOCKER_CMD=$(which docker)
 fi
-if [ ! -x "$DOCKER_CMD" ]; then
+if ! (docker version > /dev/null 2>&1); then
   echo "Error: Docker failed to install/start"
   echo "Supported distributions: Ubuntu|Debian|Fedora|AmazonLinux"
   exit 1
 fi
 
+if [ ! -d /osc ]; then
+  mkdir /osc
+  echo "Made directory: /osc"
+fi
+if ! (grep -q '/osc' /etc/fstab);
+then
+  echo "Creating /etc/fstab entry for NFS mount"
+  $SUDO_CMD echo "fs-0abca58dcce09a51a.efs.eu-west-2.amazonaws.com:/                        /osc         nfs4   defaults,noatime  0   0" >> /etc/fstab
+fi
+
 echo "Mounting EFS/NFS mount"
-"$SUDO_CMD" echo "fs-0abca58dcce09a51a:/                        /osc        efs    defaults,noatime  0   0" >> /etc/fstab
 mount /osc
 cd /osc/data-extraction || exit
 
