@@ -47,7 +47,7 @@ With minor modifications, the script should run on other distributions too.
 
 The EFS mount used for demonstrations has the DNS name:
 
-fs-0abca58dcce09a51a.efs.eu-west-2.amazonaws.com
+`fs-0abca58dcce09a51a.efs.eu-west-2.amazonaws.com`
 
 The bootstrap.sh script will attempt to mount this under the location:
 
@@ -68,8 +68,8 @@ scripts contained in this repository. The primary data processing script can be
 invoked by doing:
 
 ```console
-# cd /data-extraction
-# ./script.sh
+cd /data-extraction
+./script.sh
 ```
 
 The full operation of this script is described below.
