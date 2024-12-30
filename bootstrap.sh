@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2024 The Linux Foundation
 
+# Repository location to update/refresh scripts
+CLONE_HTTPS="https://github.com/os-climate/osc-data-extraction-scripts.git"
+
 SUDO_CMD=$(which sudo)
 WHOAMI=$(whoami)
 if [ ! -x "$SUDO_CMD" ] || [ "$WHOAMI" = "root" ]; then
@@ -100,22 +103,30 @@ if [ ! -d /osc/data-extraction ]; then
   mount /osc
 fi
 
+# Navigate to EFS/NFS mount location
 cd /osc/data-extraction || exit
+
+if [ ! -d osc-data-extraction-scripts ]; then
+  echo "Updating scripts from repository:"
+  echo "$CLONE_HTTPS"
+  git clone --quiet "$CLONE_HTTPS"
+fi
+
+if [ ! -f script.sh ]; then
+  echo "Creating symlink for: script.sh"
+  ln -s osc-data-extraction-scripts/script.sh script.sh
+fi
 
 CURRENT_DIR=$(pwd)
 BASE_DIR=$(basename "$CURRENT_DIR")
 if [ "$BASE_DIR" = "data-extraction" ]; then
   echo "Starting Ubuntu Docker container..."
-  # Apple Silicon
-  # docker run -v "$PWD":/data-extraction -ti --platform linux/arm64 ubuntu:22.04 /bin/bash /data-extraction/script.sh
-  # docker run -v "$PWD":/data-extraction -ti --platform linux/arm64 ubuntu:22.04 /bin/bash
-  #
-  # x86/x64
-  # docker run -v "$PWD":/data-extraction -ti ubuntu:22.04 /bin/bash /data-extraction/script.sh
+  # By default starts an interactive shell inside container
   docker run -v "$PWD":/data-extraction -ti ubuntu:24.04 /bin/bash
-
+  # Non-interactive goes directly to data processing
+  # docker run -v "$PWD":/data-extraction -ti ubuntu:22.04 /bin/bash /data-extraction/script.sh
 else
-    echo "Error: invoke the shell script from the data-extraction folder"; exit 1
+    echo "Error: invoke the script from mounted data-extraction folder"; exit 1
 fi
 
 echo "Container and batch job stopped running"; exit 0
