@@ -5,6 +5,9 @@
 
 # OS-Climate / Data Extraction Team
 
+# Script repository/location:
+# https://github.com/os-climate/osc-data-extraction-scripts
+
 ### Bulk execution script ###
 
 set -o pipefail
@@ -12,7 +15,9 @@ set -o pipefail
 
 ### Variables
 
+# Folder location of input PDF files on EFS/NFS mount
 SOURCE="inputs"
+# Wildcard that selects the number of files to process
 SELECTION="e15*.pdf"
 
 ### Functions
@@ -24,12 +29,13 @@ _process_files() {
 export -f _process_files
 
 NPROC_CMD=$(which nproc)
-if [ -x "$NPROC_CMD" ]; then
-    THREADS=$($NPROC_CMD)
-else
+if [ ! -x "$NPROC_CMD" ]; then
     echo "Error: nproc command not found in PATH"
     exit 1
 fi
+# Determined dynamically, but can be hard-wired to a fixed value
+# Alternatively, the number available to Docker can be capped
+THREADS=$($NPROC_CMD)
 
 echo "OS-Climate / Data Extraction Team"
 echo "Bulk execution script"
