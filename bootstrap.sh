@@ -69,10 +69,6 @@ else
   echo "Supported distributions: Ubuntu|Debian|Fedora|AmazonLinux"
   exit 1
 fi
-
-# Start at boot and run Docker
-$SUDO_CMD systemctl enable docker
-$SUDO_CMD systemctl start docker
 }
 
 # Install/run Docker
@@ -80,7 +76,10 @@ DOCKER_CMD=$(which docker 2>&1)
 if [ ! -x "$DOCKER_CMD" ]; then
   _install_docker
 fi
-if ! (docker version > /dev/null 2>&1); then
+# Start at boot and run Docker
+$SUDO_CMD systemctl enable docker
+$SUDO_CMD systemctl start docker
+if ! ($SUDO_CMD docker version > /dev/null 2>&1); then
   echo "Error: Docker failed to install/start"
   echo "Supported distributions: Ubuntu|Debian|Fedora|AmazonLinux"
   exit 1
@@ -91,7 +90,7 @@ if [ ! -d /osc ]; then
   $SUDO_CMD mkdir /osc
 fi
 
-if ! (grep -q '/osc' /etc/fstab);
+if ! ($SUDO_CMD grep -q '/osc' /etc/fstab);
 then
   echo "Creating /etc/fstab entry for NFS mount"
   $SUDO_CMD echo "fs-0abca58dcce09a51a.efs.eu-west-2.amazonaws.com:/                        /osc         nfs4   defaults,noatime  0   0" >> /etc/fstab
@@ -99,22 +98,26 @@ fi
 
 if [ ! -d /osc/data-extraction ]; then
   echo "Mounting EFS/NFS mount"
-  systemctl daemon-reload
-  mount /osc
+  $SUDO_CMD systemctl daemon-reload
+  $SUDO_CMD mount /osc
 fi
 
 # Navigate to EFS/NFS mount location
-cd /osc/data-extraction || exit
+if [ -d /osc/data-extraction ]; then
+  cd /osc/data-extraction || exit
+else
+  echo "NFS mount unavailable"; exit 1
+fi
 
 if [ ! -d osc-data-extraction-scripts ]; then
   echo "Updating scripts from repository:"
   echo "$CLONE_HTTPS"
-  git clone --quiet "$CLONE_HTTPS"
+  $SUDO_CMD git clone --quiet "$CLONE_HTTPS"
 fi
 
 if [ ! -f script.sh ]; then
   echo "Creating symlink for: script.sh"
-  ln -s osc-data-extraction-scripts/script.sh script.sh
+  $SUDO_CMD ln -s osc-data-extraction-scripts/script.sh script.sh
 fi
 
 CURRENT_DIR=$(pwd)
