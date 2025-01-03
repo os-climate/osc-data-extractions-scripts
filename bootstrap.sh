@@ -90,6 +90,11 @@ if ! ($SUDO_CMD docker version > /dev/null 2>&1); then
   exit 1
 fi
 
+if [ -S /var/run/docker.sock ]; then
+  echo "Setting: setfacl -m user:$USER:rw /var/run/docker.sock"
+  $SUDO_CMD setfacl -m "user:$USER:rw" /var/run/docker.sock
+fi
+
 if [ ! -d /osc ]; then
   echo "Creating directory: /osc"
   $SUDO_CMD mkdir /osc
@@ -98,7 +103,7 @@ fi
 if ! ($SUDO_CMD grep -q '/osc' /etc/fstab);
 then
   echo "Creating /etc/fstab entry for NFS mount"
-  $SUDO_CMD echo "fs-0abca58dcce09a51a.efs.eu-west-2.amazonaws.com:/                        /osc         nfs4   defaults,noatime  0   0" >> /etc/fstab
+  echo "fs-0abca58dcce09a51a.efs.eu-west-2.amazonaws.com:/                        /osc         nfs4   defaults,noatime  0   0" | "$SUDO_CMD" tee -a
 fi
 
 if [ ! -d /osc/data-extraction ]; then
