@@ -71,8 +71,8 @@ else
 fi
 
 # Start at boot and run Docker
-systemctl enable docker
-systemctl start docker
+$SUDO_CMD systemctl enable docker
+$SUDO_CMD systemctl start docker
 }
 
 # Install/run Docker
