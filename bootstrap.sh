@@ -69,6 +69,11 @@ else
   echo "Supported distributions: Ubuntu|Debian|Fedora|AmazonLinux"
   exit 1
 fi
+
+if [ -S /var/run/docker.sock ]; then
+  echo "Setting: setfacl -m user:$USER:rw /var/run/docker.sock"
+  $SUDO_CMD setfacl -m "user:$USER:rw" /var/run/docker.sock
+fi
 }
 
 # Install/run Docker
